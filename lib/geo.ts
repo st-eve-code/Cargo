@@ -18,6 +18,10 @@ export function greatCircle(a: LL, b: LL, n: number): LL[] {
   const [lat1, lon1, lat2, lon2] = [toRad(a[0]), toRad(a[1]), toRad(b[0]), toRad(b[1])];
   const d = 2 * Math.asin(Math.sqrt(Math.sin((lat2 - lat1) / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin((lon2 - lon1) / 2) ** 2));
   if (!d) return [a, b];
+  if (Math.sin(d) < 1e-9) {
+    /* opposite points: the great-circle formula loses precision here, so a straight line is used */
+    return Array.from({ length: n + 1 }, (_, i) => [a[0] + ((b[0] - a[0]) * i) / n, a[1] + ((b[1] - a[1]) * i) / n] as LL);
+  }
   const out: LL[] = [];
   for (let i = 0; i <= n; i++) {
     const f = i / n;
