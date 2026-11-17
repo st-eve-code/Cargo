@@ -13,20 +13,22 @@ export async function POST(req: Request) {
 
   if (text(r.company, 200)) return NextResponse.json({ ok: true }); // honeypot filled: pretend success
 
+  const message = typeof r.message === "string" ? r.message.trim() : "";
+  if (message.length > 5000) {
+    return NextResponse.json({ ok: false, error: "Your message is too long." }, { status: 400 });
+  }
+
   const enquiry: Enquiry = {
     kind: r.kind === "quote" ? "quote" : "contact",
     name: text(r.name, 120),
     email: text(r.email, 200),
     phone: text(r.phone, 60),
     service: text(r.service, 120),
-    message: text(r.message, 5000),
+    message,
   };
 
   if (!enquiry.name || !enquiry.message || !/^\S+@\S+\.\S+$/.test(enquiry.email)) {
     return NextResponse.json({ ok: false, error: "Please enter your name, a valid email and a message." }, { status: 400 });
-  }
-  if (typeof r.message === "string" && r.message.length > 5000) {
-    return NextResponse.json({ ok: false, error: "Your message is too long." }, { status: 400 });
   }
 
   try {
