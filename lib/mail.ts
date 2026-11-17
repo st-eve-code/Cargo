@@ -10,6 +10,8 @@ export type Enquiry = {
   email: string;
   phone: string;
   service: string;
+  from: string;
+  to: string;
   message: string;
 };
 
@@ -49,6 +51,7 @@ export async function sendEnquiry(e: Enquiry): Promise<void> {
     ["Email", e.email],
     ["Phone", e.phone || "-"],
     ["Service", e.service || "-"],
+    ...(e.kind === "quote" ? [["Collecting from", e.from], ["Delivering to", e.to]] as [string, string][] : []),
   ];
   const text = `${label} from the website\n\n${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\nMessage:\n${e.message}\n`;
   const html = `<h2>${esc(label)} from the website</h2><table cellpadding="6">${rows

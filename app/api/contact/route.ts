@@ -24,11 +24,16 @@ export async function POST(req: Request) {
     email: text(r.email, 200),
     phone: text(r.phone, 60),
     service: text(r.service, 120),
+    from: text(r.from, 200),
+    to: text(r.to, 200),
     message,
   };
 
   if (!enquiry.name || !enquiry.message || !/^\S+@\S+\.\S+$/.test(enquiry.email)) {
     return NextResponse.json({ ok: false, error: "Please enter your name, a valid email and a message." }, { status: 400 });
+  }
+  if (enquiry.kind === "quote" && (!enquiry.from || !enquiry.to)) {
+    return NextResponse.json({ ok: false, error: "Please enter where the goods are collected from and where they are delivered to." }, { status: 400 });
   }
 
   try {
