@@ -12,6 +12,15 @@ const cache = new Map<string, { at: number; ttl: number; path: LL[]; routed: boo
 
 export type Routed = { path: LL[]; routed: boolean }; // routed: true when the path follows roads from the routing service
 
+/* removes routes whose time-to-live has passed, so routes nobody asks for again do not stay in memory */
+function store(k: string, entry: { at: number; ttl: number; path: LL[]; routed: boolean }): void {
+  const now = Date.now();
+  for (const [old, value] of cache) {
+    if (now - value.at >= value.ttl) cache.delete(old);
+  }
+  cache.set(k, entry);
+}
+
 const key = (a: LL, b: LL) => `${a[0].toFixed(4)},${a[1].toFixed(4)}|${b[0].toFixed(4)},${b[1].toFixed(4)}`;
 
 const isPair = (v: unknown): v is [number, number] =>
@@ -61,14 +70,14 @@ export async function routePath(mode: Mode, a: LL, b: LL): Promise<Routed> {
   if (mode === "road") {
     const path = await drivingPath(a, b);
     if (path) {
-      cache.set(k, { at: Date.now(), ttl: ROAD_TTL_MS, path, routed: true });
+      store(k, { at: Date.now(), ttl: ROAD_TTL_MS, path, routed: true });
       return { path, routed: true };
     }
-    cache.set(k, { at: Date.now(), ttl: FALLBACK_TTL_MS, path: arc, routed: false });
+    store(k, { at: Date.now(), ttl: FALLBACK_TTL_MS, path: arc, routed: false });
     return { path: arc, routed: false };
   }
 
-  cache.set(k, { at: Date.now(), ttl: ROAD_TTL_MS, path: arc, routed: false });
+  store(k, { at: Date.now(), ttl: ROAD_TTL_MS, path: arc, routed: false });
   return { path: arc, routed: false };
 }
 
