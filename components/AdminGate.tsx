@@ -23,7 +23,9 @@ export default function AdminGate({ configured }: { configured: boolean }) {
         router.refresh();
         return;
       }
-      setError(res.status === 503 ? "The admin password is not set up yet. Run npm run admin:password." : "That is not the password.");
+      if (res.status === 429) setError("Too many wrong attempts. Please wait 15 minutes and try again.");
+      else if (res.status === 503) setError("The admin password is not set up yet. Run npm run admin:password.");
+      else setError("That is not the password.");
     } catch {
       setError("Could not reach the server. Please try again.");
     }
