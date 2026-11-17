@@ -15,6 +15,9 @@ export type Enquiry = {
 
 export class MailNotConfigured extends Error {}
 
+/* header values must stay on one line and cannot add addresses: line breaks and <>" become spaces */
+const headerText = (t: string) => t.replace(/[\r\n\t<>"]/g, " ").replace(/\s+/g, " ").trim();
+
 const esc = (t: string) => t.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
 
 export function mailConfigured(): boolean {
@@ -55,8 +58,8 @@ export async function sendEnquiry(e: Enquiry): Promise<void> {
   await getTransport().sendMail({
     from: process.env.MAIL_FROM,
     to: site.email,
-    replyTo: `${e.name} <${e.email}>`,
-    subject: `${label} from ${e.name} (${site.name})`,
+    replyTo: `${headerText(e.name)} <${headerText(e.email)}>`,
+    subject: `${label} from ${headerText(e.name)} (${site.name})`,
     text,
     html,
   });
