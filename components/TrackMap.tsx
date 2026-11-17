@@ -10,9 +10,11 @@ export type Layer = "map" | "sat";
 export type Focus = { ll: LL; n: number };
 
 /* Free tiles for development. Check each provider's usage terms before launch, or switch to your own key (MapTiler, Stadia, Mapbox...). */
+/* the map key comes from NEXT_PUBLIC_MAP_TILE_KEY (see .env.example); it is not stored in the source */
+const MAP_KEY = process.env.NEXT_PUBLIC_MAP_TILE_KEY ? `?key=${encodeURIComponent(process.env.NEXT_PUBLIC_MAP_TILE_KEY)}` : "";
 const TILES = {
   map: {
-    url: "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_59lm_1_933e5b609c8677fc3b0d447a",
+    url: `https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png${MAP_KEY}`,
     opts: { subdomains: "abcd", maxZoom: 20, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' },
   },
   sat: {
