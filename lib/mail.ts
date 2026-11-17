@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 import { site } from "./site";
 
 /* server only. Sends the contact and quote forms to the site email.
@@ -22,9 +22,9 @@ export function mailConfigured(): boolean {
 }
 
 /* created on first use: the SMTP settings do not change while the server runs, so one transport serves every enquiry */
-let transport: nodemailer.Transporter | null = null;
+let transport: Transporter | null = null;
 
-function getTransport(): nodemailer.Transporter {
+function getTransport(): Transporter {
   if (!transport) {
     transport = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
