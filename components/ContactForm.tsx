@@ -20,6 +20,11 @@ export default function ContactForm({ kind = "contact" }: { kind?: "contact" | "
       setError("Please enter your name, a valid email and a message.");
       return;
     }
+    if (kind === "quote" && (!data.from?.trim() || !data.to?.trim())) {
+      setStatus("error");
+      setError("Please enter where the goods are collected from and where they are delivered to.");
+      return;
+    }
 
     setStatus("sending");
     try {
@@ -50,6 +55,12 @@ export default function ContactForm({ kind = "contact" }: { kind?: "contact" | "
           {services.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
+      {kind === "quote" && (
+        <>
+          <div className="cn-row"><label htmlFor="cn-from">Collecting from (departure) *</label><input id="cn-from" name="from" type="text" maxLength={200} placeholder="e.g. Lagos, Nigeria" /></div>
+          <div className="cn-row"><label htmlFor="cn-to">Delivering to (destination) *</label><input id="cn-to" name="to" type="text" maxLength={200} placeholder="e.g. Toronto, Canada" /></div>
+        </>
+      )}
       <div className="cn-row top"><label htmlFor="cn-message">Message</label><textarea id="cn-message" name="message" required /></div>
 
       {/* spam trap: real visitors never see or fill this */}
