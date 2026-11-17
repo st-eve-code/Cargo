@@ -32,6 +32,9 @@ export default function TrackingApp() {
   const consent = useConsent();
   const recent = useRecent();
   const latestRequest = useRef(0);
+  const scrollTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(scrollTimer.current), []);
 
   const search = useCallback((raw: string) => {
     const number = raw.trim();
@@ -44,7 +47,8 @@ export default function TrackingApp() {
       if (next.kind !== "found") return;
       addRecent(number);
       window.history.replaceState(null, "", `/tracking?tracking=${encodeURIComponent(number)}`);
-      setTimeout(() => top.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+      window.clearTimeout(scrollTimer.current);
+      scrollTimer.current = window.setTimeout(() => top.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
     });
   }, []);
 
