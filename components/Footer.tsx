@@ -66,7 +66,7 @@ export default function Footer() {
 
       <div className="ft-bar">
         <span>Copyright © {site.copyrightYear} {site.name} | All rights reserved</span>
-        <ul>{legal.map((l) => <li key={l}><a href="#">{l}</a></li>)}</ul>
+        <ul>{legal.map((l) => <li key={l}>{l}</li>)}</ul>
       </div>
       <ScrollAnimations />
     </footer>
