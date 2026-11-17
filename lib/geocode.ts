@@ -7,16 +7,29 @@ export type Place = { lat: number; lon: number; display: string };
 
 const cache = new Map<string, Place | null>();
 let lastCall = 0;
+let queue: Promise<unknown> = Promise.resolve();
+
+/* lookups run one at a time, so concurrent requests are spaced out too */
+function spaced<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(async () => {
+    const wait = lastCall + 1100 - Date.now();
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    lastCall = Date.now();
+    return task();
+  });
+  queue = run.catch(() => undefined);
+  return run;
+}
 
 /* null: no place matched the address. Throws: the lookup service could not be reached. */
 export async function geocode(address: string): Promise<Place | null> {
   const q = address.trim().toLowerCase();
   if (cache.has(q)) return cache.get(q) ?? null;
+  return spaced(() => lookup(address, q));
+}
 
-  const wait = lastCall + 1100 - Date.now();
-  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-  lastCall = Date.now();
-
+async function lookup(address: string, q: string): Promise<Place | null> {
+  if (cache.has(q)) return cache.get(q) ?? null;
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=0&q=${encodeURIComponent(address.trim())}`;
   const res = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { "user-agent": "PioneerCargoTracking/1.0" } });
   if (!res.ok) throw new Error(`geocoder ${res.status}`);
