@@ -31,12 +31,15 @@ export default function TrackingApp() {
   const input = useRef<HTMLInputElement>(null);
   const consent = useConsent();
   const recent = useRecent();
+  const latestRequest = useRef(0);
 
   const search = useCallback((raw: string) => {
     const number = raw.trim();
     if (!number) { setState({ kind: "error", message: "Please enter your tracking number." }); return; }
+    const request = ++latestRequest.current;
     setState({ kind: "loading" });
     fetchState(number).then((next) => {
+      if (request !== latestRequest.current) return; // a newer search has started since this one
       setState(next);
       if (next.kind !== "found") return;
       addRecent(number);
@@ -51,8 +54,9 @@ export default function TrackingApp() {
     if (!q) return;
     if (input.current) input.current.value = q;
     let live = true;
+    const request = ++latestRequest.current;
     fetchState(q).then((next) => {
-      if (!live) return;
+      if (!live || request !== latestRequest.current) return;
       setState(next);
       if (next.kind === "found") addRecent(q);
     });
