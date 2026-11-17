@@ -52,7 +52,10 @@ export function parseOrderInput(raw: unknown): ParseResult {
   if (toAddress.length < 3 || toAddress.length > 200) return { ok: false, error: "Enter the destination address, for example Toronto, Canada." };
 
   const eta = text(r.eta);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(eta) || Number.isNaN(Date.parse(eta))) return { ok: false, error: "Enter the estimated delivery date." };
+  const etaDate = new Date(`${eta}T00:00:00Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(eta) || Number.isNaN(etaDate.getTime()) || etaDate.toISOString().slice(0, 10) !== eta) {
+    return { ok: false, error: "Enter the estimated delivery date." };
+  }
 
   const weightValue = num(r.weightValue);
   if (!Number.isFinite(weightValue) || weightValue <= 0 || weightValue > 100000) return { ok: false, error: "Enter the weight." };
