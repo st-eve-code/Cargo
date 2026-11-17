@@ -5,6 +5,7 @@ import type { LL } from "./geo";
 
 export type Place = { lat: number; lon: number; display: string };
 
+const CACHE_MAX = 500;
 const cache = new Map<string, Place | null>();
 let lastCall = 0;
 let queue: Promise<unknown> = Promise.resolve();
@@ -19,6 +20,12 @@ function spaced<T>(task: () => Promise<T>): Promise<T> {
   });
   queue = run.catch(() => undefined);
   return run;
+}
+
+/* the map keeps insertion order, so the first key is the oldest */
+function remember(q: string, place: Place | null): void {
+  if (!cache.has(q) && cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value as string);
+  cache.set(q, place);
 }
 
 /* null: no place matched the address. Throws: the lookup service could not be reached. */
@@ -37,7 +44,7 @@ async function lookup(address: string, q: string): Promise<Place | null> {
   if (!Array.isArray(json)) throw new Error("geocoder response");
   const hit = json[0] as { lat?: unknown; lon?: unknown; display_name?: unknown } | undefined;
   if (!hit || typeof hit.lat !== "string" || typeof hit.lon !== "string") {
-    cache.set(q, null);
+    remember(q, null);
     return null;
   }
   const place: Place = {
@@ -45,7 +52,7 @@ async function lookup(address: string, q: string): Promise<Place | null> {
     lon: Number(hit.lon),
     display: typeof hit.display_name === "string" ? hit.display_name : address.trim(),
   };
-  cache.set(q, place);
+  remember(q, place);
   return place;
 }
 
