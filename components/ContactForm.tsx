@@ -57,8 +57,8 @@ export default function ContactForm({ kind = "contact" }: { kind?: "contact" | "
       </div>
       {kind === "quote" && (
         <>
-          <div className="cn-row"><label htmlFor="cn-from">Collecting from (departure) *</label><input id="cn-from" name="from" type="text" maxLength={200} placeholder="e.g. Lagos, Nigeria" /></div>
-          <div className="cn-row"><label htmlFor="cn-to">Delivering to (destination) *</label><input id="cn-to" name="to" type="text" maxLength={200} placeholder="e.g. Toronto, Canada" /></div>
+          <div className="cn-row"><label htmlFor="cn-from">From *</label><input id="cn-from" name="from" type="text" maxLength={200} placeholder="City, country" /></div>
+          <div className="cn-row"><label htmlFor="cn-to">To *</label><input id="cn-to" name="to" type="text" maxLength={200} placeholder="City, country" /></div>
         </>
       )}
       <div className="cn-row top"><label htmlFor="cn-message">Message</label><textarea id="cn-message" name="message" required /></div>
