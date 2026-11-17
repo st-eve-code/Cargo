@@ -14,7 +14,12 @@ const CHANGED = "pc-cookies-changed";
 
 const readCookie = (name: string): string | null => {
   const hit = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`));
-  return hit ? decodeURIComponent(hit.slice(name.length + 1)) : null;
+  if (!hit) return null;
+  try {
+    return decodeURIComponent(hit.slice(name.length + 1));
+  } catch {
+    return null; // a malformed value is treated as missing instead of breaking the page
+  }
 };
 
 const writeCookie = (name: string, value: string) => {
